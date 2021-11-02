@@ -5,26 +5,31 @@ Process to encrypt a password among m parties
 import sys
 from mpyc.runtime import mpc
 
+password_size = 8   # upto to 256 bit password
+secbits = mpc.SecFld(2 ** password_size)
+password = 0
 
-# voters = list(range(mpc.parties))  # parties P[0],...,P[t]
+participants = list(range(len(mpc.parties)))
 
-# if mpc.pid in voters:
-#     vote = int(sys.argv[1]) if sys.argv[1:] else 1  # default "yes"
-# else:
-#     vote = None  # no input
+if mpc.pid == 0:   # local user
+    # specify as number for now, will need proper hashing later
+    password = int(sys.argv[1])
 
-# secbit = mpc.SecInt(1)  # 1-bit integers suffice
+mpc.run(mpc.start())
+sec_pass = mpc.input(secbits(password), senders=participants)
 
-# mpc.run(mpc.start())
-# votes = mpc.input(secbit(vote), senders=voters)
-# result = mpc.run(mpc.output(mpc.all(votes), receivers=voters))
-# mpc.run(mpc.shutdown())
+rand_bits = [mpc.random._randbelow(secbits, 2 ** password_size)
+             for _ in participants[1:]]
 
-# if result is None:  # no output
-#     print('Thanks for serving as oblivious matchmaker;)')
-# elif result:
-#     print(
-#         f'Match: unanimous agreement between {t+1} part{"ies" if t else "y"}!')
-# else:
-#     print(
-#         f'No match: someone disagrees among {t+1} part{"ies" if t else "y"}?')
+sec_pass = sec_pass[0]
+for p, rand_str in zip(participants[1:], rand_bits):
+    sec_pass = sec_pass ^ rand_str
+
+results = []
+results.append(mpc.run(mpc.output(sec_pass, receivers=0)))
+
+for i in participants[1:]:
+    results.append(mpc.run(mpc.output(rand_bits[i-1], receivers=i)))
+
+mpc.run(mpc.shutdown())
+print(results)
