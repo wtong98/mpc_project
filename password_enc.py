@@ -32,4 +32,8 @@ for i in participants[1:]:
     results.append(mpc.run(mpc.output(rand_bits[i-1], receivers=i)))
 
 mpc.run(mpc.shutdown())
-print(results)
+
+my_result = int(results[mpc.pid])
+
+with open(f'{mpc.pid}.key', 'w') as fp:
+    fp.write(str(my_result))
