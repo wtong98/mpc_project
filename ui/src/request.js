@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 import axios from 'axios';
 
-const localServerUrl = 'localhost:36287';
+const localServerUrl = 'localhost:36227';
 
 export function usePasswordList() {
     const [passwordList, setPasswordList] = useState([]);
