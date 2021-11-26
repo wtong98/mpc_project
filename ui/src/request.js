@@ -2,40 +2,21 @@ import { useState, useEffect } from 'react';
 
 import axios from 'axios';
 
-const localServerUrl = 'localhost:36227';
+const localServerUrl = 'http://localhost:36227';
 
-export function usePasswordList() {
-    const [passwordList, setPasswordList] = useState([]);
+export function useAccountList() {
+    const [accountList, setAccountList] = useState([]);
 
     useEffect(() => {
-        async function getPasswords() {
-            // const resp = await axios.get(localServerUrl + '/list')
-            // setPasswordList(resp.data)
-            const dummyPasswords = [
-                {
-                    pid: 0,
-                    account: 'Netflix',
-                    username: 'CouchPoetaetoe',
-                },
-                {
-                    pid: 1,
-                    account: 'Steam',
-                    username: 'PuppyCh0w'
-                },
-                {
-                    pid: 2,
-                    account: 'Email',
-                    username: 'crypto.anarchist@protonmail.com'
-                }
-            ]
-
-            setPasswordList(dummyPasswords)
+        async function getAccounts() {
+            const resp = await axios.get(localServerUrl + '/list')
+            setAccountList(resp.data)
         }
 
-        getPasswords();
+        getAccounts();
     }, []);
 
-    return passwordList;
+    return accountList;
 }
 
 export async function addPassword(data) {
@@ -43,10 +24,12 @@ export async function addPassword(data) {
     return resp;
 }
 
-export function usePasswordDecrypt(pid) {
-
+export async function getPassword(accountName) {
+    const resp = await axios.get(localServerUrl + '/get/' + accountName);
+    return resp.data;
 }
 
-export function deleteAccount(pid) {
-
+export async function deletePassword(accountName) {
+    const resp = await axios.get(localServerUrl + '/delete/' + accountName);
+    return resp.data;
 }
